@@ -1,0 +1,34 @@
+<div class="row" *ngFor="let stockQuoteData of stockQuoteDatas; let i = index;">
+  <div class="col-sm-6">
+    <div class="card mt-3">
+      <div class="card-body">
+        <h5 class="card-title">{{ companyDatas[i]?.description + " (" + companyDatas[i]?.displaySymbol + ")" }}<button class="btn delete" (click)="deleteStockQuote(i)">❌</button></h5>
+        <div class="d-flex justify-content-between">
+          <div>
+            <div>
+              <p class="card-text"> {{ "Change today: " + (stockQuoteData.d | percent) }}</p>
+            </div>
+            <div>
+              <p class="card-text">{{ "Opening price: " + (stockQuoteData.o | currency ) }}</p>
+            </div>
+          </div>
+          <div>
+            <div>
+              <p class="card-text">{{ "Current price: " + (stockQuoteData.c | currency)}}</p>
+            </div>
+            <div>
+              <p class="card-text">{{ "High price: " + (stockQuoteData.h | currency) }}</p>
+            </div>
+          </div>
+          <div class="currentTrend">
+            <span *ngIf="stockQuoteData.d > 0">⭡</span>
+            <span *ngIf="stockQuoteData.d < 0">⭣</span>
+          </div>
+        </div>
+        <div class="sentimentDetails">
+          <button [routerLink]="['/sentiment', companyDatas[i]?.displaySymbol]" class="btn btn-outline-primary" (click)="getCurrentStockId(i)">Go to social sentiment details ></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

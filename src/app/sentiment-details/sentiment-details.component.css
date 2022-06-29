@@ -1,0 +1,14 @@
+.card {
+  width: 214%;
+  border: 3px solid black;
+}
+
+.delete-up {
+  font-size: 350%;
+  color: forestgreen;
+}
+
+.delete-down {
+  font-size: 350%;
+  color: red;
+}

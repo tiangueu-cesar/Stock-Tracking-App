@@ -1,0 +1,34 @@
+.row {
+  margin-top: 20px;
+  margin-left: 24px;
+}
+
+.card {
+  width: 214%;
+  border: 3px solid black;
+}
+
+.openingPrice, .highPrice {
+  padding-right: 50%;
+}
+
+.card-body {
+  padding-left: 50px;
+}
+
+.sentimentDetails {
+  margin-top: 15px;
+}
+
+.delete {
+  float: right;
+}
+
+.currentTrend {
+  font-size: 80px;
+  padding-right: 30%;
+}
+
+.currentTrend > span {
+  color: forestgreen;
+}

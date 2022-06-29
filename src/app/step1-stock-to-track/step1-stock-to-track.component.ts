@@ -1,9 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { StockTrackingAppService } from "../stock-tracking-app.service";
 import { HttpErrorResponse } from "@angular/common/http";
 import { StockModel } from "../models/stock.model";
 import { ResultModel } from "../models/result.model";
+import { LOCAL_STORAGE, StorageService } from "ngx-webstorage-service";
+import { forkJoin } from "rxjs";
+
 
 @Component({
   selector: 'app-step1-stock-to-track',
@@ -14,39 +17,44 @@ export class STEP1StockToTrackComponent implements OnInit {
 
   submitSearch!: FormGroup;
   symbol!: string;
-  stockQuoteData!: StockModel [];
+  stockQuoteData!:StockModel [];
   companyData!: ResultModel [];
 
-  constructor(private fb: FormBuilder, private stockTrackingService: StockTrackingAppService) {
+  constructor(private fb: FormBuilder, private stockTrackingService: StockTrackingAppService,
+              @Inject(LOCAL_STORAGE)
+              private storage: StorageService) {
     this.submitSearch = this.fb.group({
       symbolName: ['', Validators.required]
     });
   }
 
   ngOnInit(): void {
+    this.stockQuoteData = this.stockTrackingService.getStockDataFromLocalStorage();
+    this.companyData = this.stockTrackingService.getCompanyDataFromLocalStorage();
   }
 
 
   onTrackStock() {
     this.symbol = this.submitSearch.controls['symbolName'].value;
-    this.stockTrackingService.getCurrentStockQuote(this.symbol).subscribe(
-      () => {
-        this.stockQuoteData = this.stockTrackingService.getStockDataFromLocalStorage();
-        console.log(this.stockQuoteData);
-        console.log("Length: stockQuote " + this.stockQuoteData.length);
-      },
-      (error: HttpErrorResponse) => {
-        console.log(error.message);
-      });
 
-    this.stockTrackingService.getCompanyInformation(this.symbol).subscribe(
-      () => {
+    //Enable the execution of more than one coming source
+    forkJoin([
+      this.stockTrackingService.getCurrentStockQuote(this.symbol.toUpperCase()),
+      this.stockTrackingService.getCompanyInformation(this.symbol.toUpperCase()),
+    ]).subscribe({
+      next: () => {
+        this.stockQuoteData = this.stockTrackingService.getStockDataFromLocalStorage();
         this.companyData = this.stockTrackingService.getCompanyDataFromLocalStorage();
-        console.log(this.companyData);
-        console.log("Length: Company " + this.companyData.length);
       },
-      (error: HttpErrorResponse) => {
-        console.log(error.message);
-      });
+      error: (err: HttpErrorResponse) => {
+        console.error(err.message ?? err);
+      }
+    })
   }
+
+  deleteStock(id: number) {
+    this.stockQuoteData = this.stockTrackingService.deleteAndRetrieveStockData(id);
+    this.companyData = this.stockTrackingService.deleteAndRetrieveCompanyData(id);
+  }
+
 }

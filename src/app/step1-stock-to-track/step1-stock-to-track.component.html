@@ -9,9 +9,12 @@
           <input type="text" name="symbol" id="symbol" formControlName="symbolName">
         </div>
         <div class="search-stock">
-          <input type="submit" value="Track Stock">
+          <button type="submit" value="Track Stock">Track Stock</button>
         </div>
       </div>
     </form>
   </div>
+</div>
+<div class="container">
+  <app-current-quote-data [companyDatas]="companyData" [stockQuoteDatas]="stockQuoteData" (onDelete)="deleteStock($event)"></app-current-quote-data>
 </div>

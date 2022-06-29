@@ -1,10 +1,13 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { StockModel } from "./models/stock.model";
 import { map } from "rxjs/operators";
 import { CompanyModel } from "./models/company.model";
 import { ResultModel } from "./models/result.model";
+import { LOCAL_STORAGE, StorageService } from "ngx-webstorage-service";
+import { SentimentModel } from "./models/sentiment.model";
+import {SentimentDataModel} from "./models/sentiment.data.model";
 
 @Injectable({
   providedIn: 'root'
@@ -14,10 +17,14 @@ export class StockTrackingAppService {
   baseUrl: string = "https://finnhub.io/api/v1";
   JSONDataStockQuote!: StockModel;
   JSONDataCompanyInformation!: ResultModel;
-  arrayOfStockQuoteInLocalStorage: StockModel [] = [];
-  arrayOfCompanyInformationInLocalStorage: ResultModel [] = [];
+  stockQuoteDatas!: StockModel [];
+  companyInformations!: ResultModel [];
+  from: string = "2022-04-01";
+  to: string = "2022-06-01";
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient,
+              @Inject(LOCAL_STORAGE)
+              public storage: StorageService) { }
 
   getCurrentStockQuote(symbol: string): Observable<void> {
     return this.http.get<StockModel>(`${this.baseUrl}/quote?symbol=${symbol}&token=${this.token}`)
@@ -32,10 +39,9 @@ export class StockTrackingAppService {
               "pc": stockQuoteData.pc,
               "t": stockQuoteData.t
             };
-          this.arrayOfStockQuoteInLocalStorage.push(this.JSONDataStockQuote);
-          setTimeout(() => {
-            localStorage.setItem("StockQuote", JSON.stringify(this.arrayOfStockQuoteInLocalStorage));
-            }, 1500);
+          const current = this.storage.get("StockQuote") ?? [];
+          current.push(this.JSONDataStockQuote);
+          this.storage.set("StockQuote", current);
       }));
   }
 
@@ -48,20 +54,40 @@ export class StockTrackingAppService {
                   "symbol": companyData.result[0].symbol,
                   "type": companyData.result[0].type
             }
-            this.arrayOfCompanyInformationInLocalStorage.push(this.JSONDataCompanyInformation);
-            setTimeout(() => {
-              localStorage.setItem("companyInformation", JSON.stringify(this.arrayOfCompanyInformationInLocalStorage));
-            }, 1000)
+            //Check if Key: CompanyInformation null | undefined. If yes return [], otherwise the data
+            const current = this.storage.get("CompanyInformation") ?? [];
+            current.push(this.JSONDataCompanyInformation);
+            this.storage.set("CompanyInformation", current);
       }));
   }
 
+  deleteAndRetrieveStockData(index: number): StockModel[] {
+    const current = this.storage.get('StockQuote') as StockModel[];
+    current.splice(index, 1);
+    this.storage.set('StockQuote', current);
+    return current;
+  }
+
+  deleteAndRetrieveCompanyData(index: number): ResultModel[] {
+    const current = this.storage.get('CompanyInformation') as ResultModel[];
+    current.splice(index, 1);
+    this.storage.set('CompanyInformation', current);
+    return current;
+  }
+
   getStockDataFromLocalStorage(): StockModel [] {
-    let data = JSON.parse(<string>localStorage.getItem("StockQuote"));
-    return JSON.parse(<string>localStorage.getItem("StockQuote"));
+    return this.storage.get('StockQuote');
   }
 
   getCompanyDataFromLocalStorage(): ResultModel [] {
-    let data = JSON.parse(<string>localStorage.getItem("companyInformation"));
-    return JSON.parse(<string>localStorage.getItem("companyInformation"));
+    return this.storage.get('CompanyInformation');
   }
+
+  getSentimentByCompanyNameAndMonths(symbol: any): Observable<SentimentDataModel[]> {
+    return this.http.get<SentimentModel>(`${this.baseUrl}/stock/insider-sentiment?symbol=${symbol}&token=${this.token}&from=${this.from}&to=${this.to}`)
+      .pipe(map(sentimentData => {
+        return sentimentData.data;
+      }));
+  }
+
 }

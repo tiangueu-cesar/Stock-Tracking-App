@@ -4,6 +4,7 @@
   padding-left: 90px;
   margin-left: 50px;
   margin-right:50px;
+  margin-top: 15px;
 }
 
 .search-stock {
@@ -22,6 +23,6 @@ input[type="text"] {
   border: 3px solid black;
 }
 
-input[type="submit"] {
-  border: 4px solid black;
+button[type="submit"] {
+  border: 3px solid black;
 }

@@ -1,0 +1,31 @@
+<div class="row mt-3">
+  <div class="col-sm-6">
+    <div class="card mt-3">
+      <div class="card-body">
+        <h5 class="card-title">{{ companyInformation.description + " (" + companyInformation.displaySymbol + ")" }}</h5>
+        <div class="d-flex justify-content-between">
+          <div class="row" *ngFor="let sentimentsData of sentimentsDatas; let i = index;">
+            <div class="col">
+              <div class="row">
+                <p class="card-text"> {{ monthNames[sentimentsData.month-1] | uppercase }}</p>
+              </div>
+              <div class="row">
+                <p class="card-text"> {{ "Change:" + (sentimentsData.change | number) }}</p>
+              </div>
+              <div class="row">
+                <p class="card-text"> {{ "MSPR: " + (sentimentsData.mspr | number : '1.2-2') }}</p>
+              </div>
+            </div>
+            <div class="col mx-2">
+              <button class="btn delete-up" *ngIf="sentimentsData.change > 0">🡹</button>
+              <button class="btn delete-down" *ngIf="sentimentsData.change < 0">🡻</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="stockLists mt-5">
+      <a [routerLink]="['/']" class="btn btn-outline-primary">< Back to list of stocks</a>
+    </div>
+</div>
+</div>
