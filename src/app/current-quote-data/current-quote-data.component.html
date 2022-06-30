@@ -21,8 +21,8 @@
             </div>
           </div>
           <div class="currentTrend">
-            <span *ngIf="stockQuoteData.d > 0">⭡</span>
-            <span *ngIf="stockQuoteData.d < 0">⭣</span>
+            <span *ngIf="(stockQuoteData.d) > 0">⭡</span>
+            <span *ngIf="(stockQuoteData.d) < 0">⭣</span>
           </div>
         </div>
         <div class="sentimentDetails">
